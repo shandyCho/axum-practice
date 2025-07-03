@@ -1,4 +1,3 @@
-use axum::{Json};
 use serde_json::{json, Value};
 
 pub async fn get_initial_data() -> Vec<Value> {
