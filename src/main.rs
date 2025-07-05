@@ -3,12 +3,20 @@
 pub mod master;
 pub mod config;
 
-use axum::routing::{get};
-use axum::{Json, Router};
+use std::time::Duration;
+
+use axum::{
+    Json, 
+    Router,
+    body::{Bytes, Body},
+    http::{ Request, Response },
+    routing::{get, post}
+};
+
 use serde::{Serialize};
-use tower_http::trace::{Trace, TraceLayer};
+use tower_http::trace::{self, TraceLayer};
 use tower::ServiceBuilder;
-use master::handler::{ start, initial_data };
+use tracing::Span;
 use config::cors_config::cors_setting;
 
 
@@ -22,6 +30,20 @@ struct Message {
 async fn main() {
     // 서버 IP 및 포트 정의
     let addr = "0.0.0.0:3000";
+    tracing_subscriber::fmt::init();
+    // 미들웨어 서비스 정의
+    let service = ServiceBuilder::new()
+        .layer(
+            TraceLayer::new_for_http()
+            .on_request(|request: &Request<Body>, _span: &Span| {
+                tracing::debug!("started {} {}", request.method(), request.uri().path())
+            })
+            .on_response(|response: &Response<Body>, latency: Duration, _span: &Span| {
+                tracing::debug!("response generated in {:?}", latency)
+            })
+        )
+        .layer(cors_setting::cors_setting());
+    
     // 라우터 정의
     let router = Router::new()
     .route("/", get(|| async {"index!"}))
