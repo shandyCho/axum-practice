@@ -4,3 +4,4 @@
 pub mod handler;
 // pub 로 설정하지 않을 경우 동일 모듈 내에서만 사용 가능하다
 mod usecase;
+mod entity;
