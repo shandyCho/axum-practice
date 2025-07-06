@@ -1,24 +1,44 @@
 use serde::{Deserialize, Serialize};   
 use std::sync::Mutex;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct VacationInfo {
+    pub vacation_time_type: &'static str,
+    pub vacation_range_type: &'static str,
+    pub vacation_date: &'static str,
+    pub vacation_user_name: &'static str
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Employee {
     id: u32,
     name: &'static str,
     department: &'static str,
     join_date: &'static str,
-    is_working: bool,
-    is_late: bool,
-    total_vacation_date: i32,
-    vacation_info: Vec<VacationInfo>
+    pub is_working: bool,
+    pub is_late: bool,
+    pub total_vacation_date: i32,
+    pub vacation_info: Vec<VacationInfo>
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct VacationInfo {
-    vacation_time_type: &'static str,
-    vacation_range_type: &'static str,
-    vacation_date: &'static str,
-    vacation_user_name: &'static str
+impl Employee {
+    pub fn change_working_status(mut self, is_working: bool, is_late: bool) -> Mutex<Employee>{
+        self.is_late = is_late;
+        self.is_working = is_working;
+        tracing::debug!("is changed? {:?}", self);
+        self.print_status();
+        let result: Employee = self;
+        
+        Mutex::new(result)
+        
+    }
+    // 직원의 현재 상태를 출력하는 헬퍼 함수
+    pub fn print_status(&self) {
+        tracing::debug!(
+            "직원 {} (ID: {}) 상태: 근무중={}, 지각여부={}",
+            self.name, self.id, self.is_working, self.is_late
+        );
+    }
 }
 
 pub static FIRST_EMPLOYEE: Mutex<Employee> = Mutex::new(Employee {
