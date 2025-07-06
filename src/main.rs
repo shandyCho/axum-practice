@@ -19,7 +19,7 @@ use tower_http::trace::{self, TraceLayer};
 use tower::ServiceBuilder;
 use master::handler::{ initial_data };
 use tracing::Span;
-use working_status_management::handler::{ change_working_status };
+use working_status_management::handler::{ working_status_change_handler };
 use config::cors_config::cors_setting;
 
 #[derive(Serialize)]
@@ -50,7 +50,7 @@ async fn main() {
     .route("/", get(|| async {"index!"}))
     .route("/api/v1/users", get(get_users))
     .route("/api/v1/init", get(initial_data))
-    .route("/api/v1/working-status/{user_id}", post(change_working_status))
+    .route("/api/v1/working-status/{user_id}", post(working_status_change_handler))
     .layer(service);
 
 
